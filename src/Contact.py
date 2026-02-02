@@ -10,6 +10,7 @@ class Contact(ABC):
     # And super checks the regex of phone numbers and mails
     # via the constructorsl, the following is sufficient for
     # all our contacts:
+    # The exceptions can then be catched by our decorators.
     self.phone = PhoneNumber(phone)
     self.email = Mail(email)
     self.created_at = created_at
