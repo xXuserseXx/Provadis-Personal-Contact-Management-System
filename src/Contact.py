@@ -1,12 +1,13 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
+from RegularExpressions import PhoneNumber, Mail
 
 class Contact(ABC):
   
   def __init__(self, name, phone, email, created_at):
     self.name = name
-    self.phone = phone
-    self.email = email
+    self.phone = PhoneNumber(phone)
+    self.email = Mail(email)
     self.created_at = created_at
     
   def __str__(self):
