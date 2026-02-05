@@ -6,7 +6,7 @@ class EmergencyContact(Contact):
     self.priority_level = priority_level
     
   def get_contact_type(self):
-    return "emergency"
+    return type(self).__name__
     
   def __str__(self):
     return f"level {self.priority_level} Emergency Contact, Name: {self.name}, Phone: {self.phone}, Email: {self.email}"
