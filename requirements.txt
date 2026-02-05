@@ -1,2 +1,0 @@
-pytest # For testing
-pytest-cov
