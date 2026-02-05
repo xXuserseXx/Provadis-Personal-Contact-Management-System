@@ -17,3 +17,6 @@ class PersonalContact(Contact):
     info = super().to_dict()
     info["birthday"] = self.birthday
     return info
+
+  def get_contact_type(self):
+        return type(self).__name__

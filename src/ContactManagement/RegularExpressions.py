@@ -35,18 +35,21 @@ phone_number_pattern = re.compile(r"^(?:(?:\+|00)\d{1,3})?[0-9]*$")
 # Sounds like a good use case for inhertance:
 
 class   Mail(str):
-    def __init__(self, mail: str):
+    def __new__(cls, mail: str):
         if not isinstance(mail, str):
             raise TypeError(f"Constructor of class Mail expects a string not a {type(mail)}")
         if not re.fullmatch(mail_pattern, mail):
             raise ValueError(f"E mail does not obey the regex pattern")
-        super().__init__(mail) # Invokation of string copy constructor
+        super().__new__(cls, mail) # Invokation of string copy constructor
 
 
 class   PhoneNumber(str):
-    def __init__(self, phone_number: str):
+    # __new__ is used instead of __init__ as objects of parent class are immutable.
+    # __init__ first creates the Object and then tries to change its value.
+    # This is why __init__ has self available while __new__ can only refer to the class.
+    def __new__(cls, phone_number: str):
         if not isinstance(phone_number, str):
             raise TypeError(f"Constructor of class PhoneNumber expects a string not a {type(phone_number)}")
         if not re.fullmatch(phone_number_pattern, phone_number):
             raise ValueError(f"Phone number does not obey the regex pattern")
-        super().__init__(phone_number) # Invokation of string copy constructor
+        super().__new__(cls, phone_number) # Invokation of string copy constructor
