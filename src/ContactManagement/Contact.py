@@ -1,12 +1,18 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
+from ContactManagement.RegularExpressions import PhoneNumber, Mail
 
 class Contact(ABC):
   
   def __init__(self, name, phone, email, created_at):
     self.name = name
-    self.phone = phone
-    self.email = email
+    # As all subclasses call super
+    # And super checks the regex of phone numbers and mails
+    # via the constructorsl, the following is sufficient for
+    # all our contacts:
+    # The exceptions can then be catched by our decorators.
+    self.phone = PhoneNumber(phone)
+    self.email = Mail(email)
     self.created_at = created_at
     
   def __str__(self):

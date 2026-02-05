@@ -1,9 +1,11 @@
-import Contact
+from __future__ import annotations
+from ContactManagement.Contact import Contact
+from datetime import date
 
 class PersonalContact(Contact):
-  def __init__(self, name, phone, email, birthday):
+  def __init__(self, name: str, phone: str, email: str, birthday: date):
     super().__init__(name, phone, email)
-    self.birthday = birthday
+    self.birthday: date = birthday
     
   def contact_type(self):
     return "personal"

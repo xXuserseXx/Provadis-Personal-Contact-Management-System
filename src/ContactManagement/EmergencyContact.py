@@ -1,4 +1,4 @@
-import Contact
+from ContactManagement.Contact import Contact
 
 class EmergencyContact(Contact):
   def __init__(self, name, phone, email, priority_level):
