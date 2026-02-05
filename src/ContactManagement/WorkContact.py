@@ -17,3 +17,6 @@ class WorkContact(Contact):
     info["company"] = self.company
     info["job_title"] = self.job_title
     return info
+
+  def get_contact_type(self)-> str:
+    return type(self).__name__
