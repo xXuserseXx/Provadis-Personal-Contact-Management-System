@@ -1,4 +1,4 @@
-import Contact
+from ContactManagement.Contact import Contact
 
 class WorkContact(Contact):
   def __init__(self, name, phone, email, company, job_title):

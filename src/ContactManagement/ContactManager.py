@@ -1,4 +1,4 @@
-import Contact
+from ContactManagement.Contact import Contact
 
 class ContactManager():
   def __init__(self):

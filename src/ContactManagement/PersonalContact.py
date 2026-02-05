@@ -1,5 +1,5 @@
 from __future__ import annotations
-import Contact
+from ContactManagement.Contact import Contact
 from datetime import date
 
 class PersonalContact(Contact):
