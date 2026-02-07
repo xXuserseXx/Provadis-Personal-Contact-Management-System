@@ -1,0 +1,6 @@
+2026-02-07 20:29:57 INFO ContactManagement.ContactManager: CONSTRUCTED_CONTACT MANAGER
+2026-02-07 20:29:57 INFO ContactManagement.ContactManager: CONSTRUCTED_CONTACT MANAGER
+2026-02-07 20:29:57 INFO ContactManagement.ContactManager: CONSTRUCTED_CONTACT MANAGER
+2026-02-07 20:29:57 INFO ContactManagement.ContactManager: CONSTRUCTED_CONTACT MANAGER
+2026-02-07 20:29:57 INFO test_contacts: CONTACTS DESERIALIZED: Name: Justus, Phone: 187, Email: gg.jr@187.de, Birthday: 1999-12-30
+Name: Justus, Phone: 187, Email: gg.jr@187.de, Company: FleischbergBrothers, Title: dr.rer.med

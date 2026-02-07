@@ -1,4 +1,4 @@
-from ContactManagement.Contact import Contact
+from ContactManagement.Contact import Contact, JsonFields
 
 class EmergencyContact(Contact):
   def __init__(self, name, phone, email, priority_level):
@@ -14,4 +14,5 @@ class EmergencyContact(Contact):
   def to_dict(self):
     info = super().to_dict()
     info["priority_level"] = self.priority_level
+    info[JsonFields.ARGS] = [self.name, str(self.phone), str(self.email), self.priority_level]
     return info

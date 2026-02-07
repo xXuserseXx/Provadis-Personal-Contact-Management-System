@@ -40,7 +40,7 @@ class   Mail(str):
             raise TypeError(f"Constructor of class Mail expects a string not a {type(mail)}")
         if not re.fullmatch(mail_pattern, mail):
             raise ValueError(f"E mail does not obey the regex pattern")
-        super().__new__(cls, mail) # Invokation of string copy constructor
+        return super().__new__(cls, mail) # Invokation of string copy constructor
 
 
 class   PhoneNumber(str):
@@ -52,4 +52,4 @@ class   PhoneNumber(str):
             raise TypeError(f"Constructor of class PhoneNumber expects a string not a {type(phone_number)}")
         if not re.fullmatch(phone_number_pattern, phone_number):
             raise ValueError(f"Phone number does not obey the regex pattern")
-        super().__new__(cls, phone_number) # Invokation of string copy constructor
+        return super().__new__(cls, phone_number) # Invokation of string copy constructor

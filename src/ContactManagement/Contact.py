@@ -1,6 +1,19 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
 from ContactManagement.RegularExpressions import PhoneNumber, Mail
+import logging
+log = logging.getLogger(__name__)
+
+from enum import StrEnum
+
+class   JsonFields(StrEnum): # A save way to refer to our json fields
+    # This is shared with the editors/consumers of our json (namely: ContactManager)
+    CONTACT_TYPE = "contact_type"
+    NAME = "name"
+    PHONE = "phone"
+    EMAIL = "email"
+    CREATED_AT = "created_at"
+    ARGS = "args"
 
 
 class Contact(ABC):
@@ -33,9 +46,9 @@ class Contact(ABC):
   @abstractmethod
   def to_dict(self):
     return {
-        "contact_type": self.get_contact_type(),
-        "name": self.name,
-        "phone": self.phone,
-        "email": self.email,
-        "created_at": self.created_at.isoformat()
+        JsonFields.CONTACT_TYPE: self.get_contact_type(),
+        JsonFields.NAME: self.name,
+        JsonFields.PHONE: str(self.phone),
+        JsonFields.EMAIL: str(self.email),
+        JsonFields.CREATED_AT: self.created_at.isoformat(),
     }

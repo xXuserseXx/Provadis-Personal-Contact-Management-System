@@ -1,4 +1,4 @@
-from ContactManagement.Contact import Contact
+from ContactManagement.Contact import Contact, JsonFields
 
 class WorkContact(Contact):
   def __init__(self, name, phone, email, company, job_title):
@@ -16,6 +16,7 @@ class WorkContact(Contact):
     info = super().to_dict()
     info["company"] = self.company
     info["job_title"] = self.job_title
+    info[JsonFields.ARGS] = [self.name, str(self.phone), str(self.email), self.company, self.job_title]
     return info
 
   def get_contact_type(self)-> str:
