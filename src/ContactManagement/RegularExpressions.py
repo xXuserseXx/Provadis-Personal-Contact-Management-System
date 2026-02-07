@@ -15,7 +15,7 @@ mail_pattern = re.compile(r"^[a-zA-Z]+[\._][a-zA-Z]+[0-9]*\@[^\s@]+\.[a-zA-Z]+$"
 # Example:
 # luis.gaertner@stud-provadis.de
 
-phone_number_pattern = re.compile(r"^(?:(?:\+|00)\d{1,3})?[0-9]*$")
+phone_number_pattern = re.compile(r"^(?:(?:\+|00)\d{1,3}\s?)?[0-9]*$")
 # What the phone number pattern means:
 # You can either give a country code or omit it.
 # If the country code is given:
