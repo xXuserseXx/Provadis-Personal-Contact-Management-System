@@ -23,7 +23,7 @@ class   Action(StrEnum):
     GATHER_PARAMETERS = "gather parameters"
 
 def gather_parameters(func: Callable[..., any]) -> Callable[..., any]: # Gathers parameters via input() to create a partial() no longer requires arguments
-        print(f"You are now prompted to input the fields required to construct {type(func)}.")
+        print(f"You are now prompted to input the fields required to construct {func.__name__}.")
         parameter = inspect.signature(func)
         for p in parameter.parameters.values():
             response_correct = False # We repeat the questions until there is a correct response
