@@ -9,7 +9,7 @@ Contact Manager ------------ NICHT-FERTIG
 - add_contact -------------- FERTIG
 - remove_contact ----------- CLI-READY
 - search_contacts ---------- NICHT-FERTIG - Concat dict values
-- list_contacts ------------ NICHT-FERTIG - sort with creation date
+- list_contacts ------------ CLI-READY (Der Letzte Kontakt wird natürlich auch an das Ende der Liste geschrieben... Keine Arbeit notwendig)
 - group_by_type ------------ CLI-READY
 
 Regular Expressions -------- FERTIG

@@ -10,7 +10,7 @@ class EmergencyContact(Contact):
     return type(self).__name__
     
   def __str__(self):
-    return f"level {self.priority_level} Emergency Contact, Name: {self.name}, Phone: {self.phone}, Email: {self.email}"
+    return f"Emergency Contact, Name: {self.name}, Phone: {self.phone}, Email: {self.email}, priority level: {self.priority_level}"
   
   def to_dict(self):
     info = super().to_dict()

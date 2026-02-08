@@ -1,197 +1,137 @@
-import argparse
-from collections.abc import Callable, Iterable
+from ContactManagement import PersonalContact, EmergencyContact, WorkContact
+from ContactManagement import Mail, PhoneNumber, Name
 from ContactManagement import ContactManager
-from ContactManagement import EmergencyContact, PersonalContact, WorkContact
-from enum import StrEnum
-from functools import partial
-import sys
-from abc import ABC, abstractmethod
-import inspect
-from functools import wraps
-from datetime import date
+from typing import Callable
+from time import sleep
+from datetime import date, datetime
 
-from datetime import datetime, date
+ADD_CONTACT = "Add contact"
+LIST_CONTACTS = "List contacts"
+EXIT = "Exit"
+REMOVE_CONTACTS = "Remove contact"
 
-def parse_value(ann, s: str):
-    if ann is date:
+def user_make_state_choice(state: dict): # The call can decide what to do with the returned dict index
+    user_made_valid_choice = False
+    if isinstance(state, dict):
+        descriptions = list(state.keys())
+    else:
+        descriptions = state
+    while not user_made_valid_choice:
         try:
-            return datetime.strptime(s, "%d.%m.%Y").date()
-        except ValueError as e:
-            raise ValueError("Expected date in format DD.MM.YYYY") from e
-    return ann(s)
+            response = int(input(">> "))
+            return descriptions[response]
+        except (TypeError, IndexError):
+            print(f"The number you gave was not within range")
 
 
-# We just want a single contact manager instance for the UI
-# And we can instantiate it right away in the global scope.
-contact_manager_singleton = ContactManager()
+def ask_for(contact_attribute: str, save_to: dict, checker: Callable[..., any], instructions: str = ""):
+    user_gave_valid_response = False # variable is just used to make it more descriptive
+    while not user_gave_valid_response:
+        try:
+            print(f"What is the {contact_attribute.replace("_", " ").replace("phone", "phone number")} of the contact?")
+            if instructions:
+                print(instructions)
+            save_to[contact_attribute] = checker(input(">> "))
+            break
+        except Exception as e:
+            print(e)
 
-class   Action(StrEnum):
-    MAIN_MENU = "main menu"
-    EXIT = "exit"
-    ADD = "add contact"
-    RM = "remove contact"
-    ADD_EMERGENCY = "emergency contact"
-    ADD_PERSONAL = "personal contact"
-    ADD_WORK = "work contact"
-    GATHER_PARAMETERS = "gather parameters"
+def check_date(date_string: str) -> date:
+    return datetime.strptime(date_string, "%d.%m.%Y").date() #Using the format specifier to ensure DD.MM.YYYY
 
-def gather_parameters(response_validator: Callable[[str], None], func: Callable[..., any]) -> Callable[..., any]: # Gathers parameters via input() to create a partial() that no longer requires arguments
-        print(f"You are now prompted to input the fields required to construct {func.__name__}.")
-        parameter = inspect.signature(func)
-        for p in parameter.parameters.values():
-            response_correct = False # We repeat the questions until there is a correct response
-            while not response_correct:
-                response = None #Initilizing in the outer scope,.
-                arg = None # Argument to our Contact constructor
-                print(f"Input parameter '{p.name}' of type {p.annotation}")
-                response = input(">>>")
-                response_validator(response) # Handles possible control flow inputs
-                # Try to instantiate the datatype using the anotated datatype:
-                # This does all the checking for us...
-                try:
-                    arg = parse_value(p.annotation, response)
-                    response_correct = True
-                    func = partial(func, arg) # Reduce the function parameters
-                    break
-                except Exception as e:
-                    print(str(e))
-                    continue
-        return func
-                    
+def ask_for_constructor_data(constructor):
+    gathered_data = { # Will be populated in this function. Used for constructor calls via **kwargs.
+        "name": None,
+        "phone": None,
+        "email": None,
+        "company": None,
+        "job_title": None,
+        "birthday": None,
+        "priority_level": None
+    }
+    ask_for(contact_attribute="name", save_to=gathered_data, checker=Name)
+    ask_for(contact_attribute="phone", save_to=gathered_data, checker=PhoneNumber)
+    ask_for(contact_attribute="email", save_to=gathered_data, checker=Mail)
+    if constructor == WorkContact:
+        ask_for(contact_attribute="company", save_to=gathered_data, checker=lambda x: x)
+        ask_for(contact_attribute="job_title", save_to=gathered_data, checker=lambda x: x)
+    elif constructor == PersonalContact:
+        ask_for(contact_attribute="birthday", save_to=gathered_data, checker=check_date, instructions="Provide the date in the following format: DD.MM.YY .")
+    elif constructor == EmergencyContact:
+        ask_for(contact_attribute="priority_level", save_to=gathered_data, checker=int)
+    # Given the subclass type, some attributes are not needed (still None), we filter them out.
+    non_none_values = {k: v for k, v in gathered_data.items() if v is not None}
+    return constructor(**non_none_values)
 
-class Component(ABC):
-    universal_actions: tuple[Action] = (Action.MAIN_MENU, Action.EXIT) # They are accessible from all components
-    actions: dict[Action, any] = {} # From each component only a subset of these will be accessible
+def print_choice(iterable):
+    for i, e in enumerate(iterable):
+        print(f"[{i}] {e}")
 
-    def __init__(self, provides: Action):
-        # self is always going to be a child class instance as Component is abstract.
-        self.actions[provides] = self # Such that other instances can call the newly registered component.
+def main():
+    # For testing only:
+    my_contact = PersonalContact(name="Justus", phone="187", email="gg.jr@187.de", birthday=date(1999, 12, 30))
+    my_contact2 = WorkContact(name="Justus", phone="187", email="gg.jr@187.de", company="FleischbergBrothers", job_title="dr.rer.med")
+    my_contact3 = EmergencyContact(name="Justus", phone="187", email="gg.jr@187.de", priority_level=67)
 
-
-def call_component_again_on_error(call_operator: Callable[..., any]):
-    @wraps(call_operator)
-    def wrapper(*args, **kwargs):
-        while True:
-            try:
-                return call_operator(*args, **kwargs)
-            except ValueError: # User did not input an int
-                print(f"Expected the string of the option or an integer!")
-                return call_operator(*args, **kwargs) # Try the same UI component again.
-            except IndexError: # look if the index is within range
-                print("Your choice is not in the option range!") # If there is an exception, we want to repeat the UI component:
-            except KeyError: # Dictionary of the action does not exist in available actions
-                print("This action has not be implemented yet!")
-    return wrapper
-
-class   UserEnteredControlFlowError(Exception):
-    pass
-
-def call_control_flow_on_control_flow_stament(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        while True:
-            try:
-                return func(*args, **kwargs)
-            except UserEnteredControlFlowError as e: # Abort the input sequence
-                action = Action(e.args[0])              # convert "exit" -> Action.EXIT
-                Component.actions[action]()             # jump to component
-                return None
-    return wrapper
-
-
-
-class   TextInputComponent(Component):
-    def __init__(self, provides: Action, effects: Callable[[Callable[[str], None]], any]):
-        super().__init__(provides)
-        self.available_text_actions: tuple[Actions] = super().universal_actions
-        self._effects = effects
-
-    @call_component_again_on_error
-    @call_control_flow_on_control_flow_stament
-    def __call__(self):
-        for effect in self._effects:
-            effect(self.validate_user_response)
-
-    def validate_user_response(self, response: str): # A callback as the user can input both control statements like 'exit' as well as data literals like 'Justus' for name.
-        actions_strings = list(map(str, self.available_text_actions))
-        if response in actions_strings: # User entered control flow statement, an exception interrupts the input field sequence
-            raise UserEnteredControlFlowError(response)
+    contact_manager = ContactManager() # This is a singleton; per program run, we only create one instance
+    contact_manager.add_contact(my_contact)
+    contact_manager.add_contact(my_contact2)
+    contact_manager.add_contact(my_contact3)
+    state = {
+        ADD_CONTACT: False,
+        LIST_CONTACTS: False,
+        REMOVE_CONTACTS: False,
+        EXIT: False,
+    }
+    while not state[EXIT]:
+        if all(v is False for v in state.values()): # User has not made any choice yet
+            print("Welcome to the contact management system, what action would you like to take?")
+            print_choice(state.keys())
+            state[user_make_state_choice(state)] = True
+        
+        # Execute the choice that the user made
+        if state[ADD_CONTACT]:
+            contact_types = {
+                "personal contact": PersonalContact,
+                "emergency contact": EmergencyContact,
+                "work contact": WorkContact
+            }
+            print("What kind of contact would you like to add?")
+            print_choice(contact_types.keys())
+            contact_constructor = contact_types[user_make_state_choice(contact_types)]
+            contact = ask_for_constructor_data(contact_constructor)
+            contact_manager.add_contact(contact)
+            state[ADD_CONTACT] = False # Job done, reset the state so that we get back to main menu
+        
+        if state[LIST_CONTACTS]:
+            print(contact_manager)
+            state[LIST_CONTACTS] = False
+        
+        if state[REMOVE_CONTACTS]:
+            print("Choose the index of the content you would like to remove.")
+            print_choice(contact_manager.contacts)
+            choice = user_make_state_choice(contact_manager.contacts)
+            choice_index = contact_manager.contacts.index(choice)
+            del contact_manager.contacts[choice_index] # Delete the contact
+            print(contact_manager)
+            state[REMOVE_CONTACTS] = False
+        
+        if state[EXIT]:
+            print("We, will save your current contacts.")
+            sleep(0.5)
+            print("Bye!")
+            for thread in contact_manager.threads:
+                thread.join()
+            exit(0) # Graceful exit.
         
 
+        # For the display:
+        print("-" * 40)
 
-class   NumberedListComponent(Component):
-    def __init__(self, provides: Action, actions_in_list: list[Action]):
-        super().__init__(provides)
-        actions_in_list[:0] = super().universal_actions
-        self.actions_in_list = actions_in_list
-        self._effects = None # By default no side effects
+            
+            
+        
 
-    def set_side_effects(self, effects: list[Callable[..., any]]):
-        self._effects = effects
-
-    @call_component_again_on_error
-    def __call__(self):
-        # If the Component has effects, execute them and return to the previous component in the call stack
-        if self._effects:
-            for effect in self._effects:
-                effect()
-            return
-    
-        for i, option in enumerate(self.actions_in_list):
-            print(f"[{i}] {option}")
-
-        choice_index = None # Initalizing it in the outer scope
-        choice = input(">>")
-        string_actions_in_list = list(map(str, self.actions_in_list)) # Need actual strings to compare actions to user input
-        if choice in string_actions_in_list:
-            choice_index = string_actions_in_list.index(choice)
-        else:
-            choice_index =  int(choice) # It is also okay if the user inputs the literal number
-
-        next_component = Component.actions[self.actions_in_list[choice_index]]
-        next_component()
-        # If the next_component just executes a side effect and returns,
-        # then we want to be at the same UI component that we came from.
-        self()
-
-def my_exit():
-    # Join all the threads before exiting the program
-    for thread in contact_manager_singleton.threads:
-        thread.join()
-    exit(0) # Exit code zero as it was a graceful exit
-
-
-# We are going to implement both CLI (for testing)
-# As well as wizzard (input()) driven UX
-def main():
-    main_menu = NumberedListComponent(provides=Action.MAIN_MENU, actions_in_list=[Action.ADD])
-
-    exit = NumberedListComponent(provides=Action.EXIT, actions_in_list=[])
-    exit.set_side_effects([
-        my_exit
-    ])
-
-    add_contact = NumberedListComponent(provides=Action.ADD, actions_in_list=[Action.ADD_EMERGENCY, Action.ADD_PERSONAL, Action.ADD_WORK])
-
-    add_emergency = TextInputComponent(provides=Action.ADD_EMERGENCY,
-    effects=[
-        # We use callbacks just like in JavaScript frameworks
-        lambda validator: contact_manager_singleton.add_contact(gather_parameters(validator, EmergencyContact))
-    ])
-
-    add_personal = TextInputComponent(provides=Action.ADD_PERSONAL,
-    effects=[
-        # We use callbacks just like in JavaScript frameworks
-        lambda validator: contact_manager_singleton.add_contact(gather_parameters(validator, PersonalContact))
-    ])
-
-    add_work = TextInputComponent(provides=Action.ADD_WORK,
-    effects=[
-        # We use callbacks just like in JavaScript frameworks
-        lambda validator: contact_manager_singleton.add_contact(gather_parameters(validator, WorkContact))
-    ])
-
-    main_menu()
 
 if __name__ == "__main__":
     main()
