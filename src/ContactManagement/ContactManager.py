@@ -151,13 +151,13 @@ class ContactManager():
   
   #TODO: Search Contacts
   def search_contacts(self, s_key):
-    r_list = []
-    keyword = s_key.strip().lower()
+    with contacts_state_lock:
+        r_list = []
+        keyword = s_key.strip().lower()
     
-    for c in self.contacts:
-      if keyword in c.to_searchable_string().lower():
-        r_list.append(c)
-    
+        for c in self.contacts:
+            if keyword in c.to_searchable_string().lower():
+                r_list.append(c)
     return r_list
   
   def list_contacts(self):
