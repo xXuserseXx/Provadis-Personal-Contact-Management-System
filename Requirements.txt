@@ -5,10 +5,10 @@ Sub Class (Work) ----------- FERTIG
 Sub Class (Emergency) ------ FERTIG
 Polymorphismus ------------- NICHT-FERTIG
 
-Contact Manager ------------ NICHT-FERTIG
+Contact Manager ------------ FERTIG
 - add_contact -------------- FERTIG
 - remove_contact ----------- FERTIG
-- search_contacts ---------- Fast-FERTIG - Concat dict values (CLI funktioniert, wenn methode funktioniert)
+- search_contacts ---------- FERTIG - Concat dict values (CLI funktioniert, wenn methode funktioniert)
 - list_contacts ------------ FERTIG
 - group_by_type ------------ FERTIG
 
@@ -26,10 +26,10 @@ Wenn man die Kontakte aus dem JSON lädt, nimmt created_at the loading zeit.
 - OPT filter_by_daterange -- OPTIONAL
 
 File Handling
-- store contacts in json --- Fertig
-- load_contacts ------------ Fertig (on startup, kein Menüpunkt)
+- store contacts in json --- FERTIG
+- load_contacts ------------ FERTIG (on startup, kein Menüpunkt)
 - - correct subclasses ----- FERTIG
-- save_contacts ------------ Fertig
+- save_contacts ------------ FERTIG
 - exception_handling ------- FERTIG
 
 Multithreading
@@ -37,4 +37,4 @@ Multithreading
 
 Logging Functionality ------ FERTIG
 - closure_based_logger ----- FERTIG
--decorator_based_logger ---- FERTIG
+- decorator_based_logger --- FERTIG
