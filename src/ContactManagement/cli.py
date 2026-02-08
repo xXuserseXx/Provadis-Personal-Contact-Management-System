@@ -6,7 +6,8 @@ from time import sleep
 from datetime import date, datetime
 
 ADD_CONTACT = "Add contact"
-LIST_CONTACTS = "List contacts"
+LIST_CONTACTS_DATE = "List contacts (by date)"
+LIST_CONTACTS_GROUP = "List contacts (by group)"
 EXIT = "Exit"
 REMOVE_CONTACTS = "Remove contact"
 SEARCH_CONTACT = "Search contact"
@@ -79,7 +80,8 @@ def main():
     contact_manager.load_contacts() # We load the contacts from the last session.
     state = {
         ADD_CONTACT: False,
-        LIST_CONTACTS: False,
+        LIST_CONTACTS_GROUP: False,
+        LIST_CONTACTS_DATE: False,
         SEARCH_CONTACT: False,
         REMOVE_CONTACTS: False,
         SAVE_CONTACTS: False,
@@ -105,9 +107,17 @@ def main():
             contact_manager.add_contact(contact)
             state[ADD_CONTACT] = False # Job done, reset the state so that we get back to main menu
         
-        if state[LIST_CONTACTS]:
-            print(contact_manager)
-            state[LIST_CONTACTS] = False
+        if state[LIST_CONTACTS_GROUP]:
+            groups = contact_manager.group_by_type()
+            for t in groups.keys():
+                print(f"Your {t.lower().replace("contact", "")} contacts:")
+                if not groups[t]:
+                    print(f"    Currently, no contacts of this type.")
+                else:
+                    for contact in list(map(lambda c: c.__str__(), groups[t])):
+                        print(contact)
+                print('\n')
+            state[LIST_CONTACTS_GROUP] = False
         
         if state[REMOVE_CONTACTS]:
             print("Choose the index of the content you would like to remove.")
@@ -140,6 +150,12 @@ def main():
             print("Saving your current contacts in the background...")
             contact_manager.save_contacts()
             state[SAVE_CONTACTS] = False
+        
+        if state[LIST_CONTACTS_DATE]:
+            for contact in contact_manager.contacts:
+                print(f"Created at {contact.created_at.strftime("%d.%m.%Y %H:%M:%S")}:")
+                print(f"    {str(contact)}")
+            state[LIST_CONTACTS_DATE] = False
 
         # For the display:
         print("-" * 40)

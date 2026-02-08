@@ -7,10 +7,10 @@ Polymorphismus ------------- NICHT-FERTIG
 
 Contact Manager ------------ NICHT-FERTIG
 - add_contact -------------- FERTIG
-- remove_contact ----------- CLI-READY
-- search_contacts ---------- NICHT-FERTIG - Concat dict values
-- list_contacts ------------ CLI-READY (Der Letzte Kontakt wird natürlich auch an das Ende der Liste geschrieben... Keine Arbeit notwendig)
-- group_by_type ------------ CLI-READY
+- remove_contact ----------- FERTIG
+- search_contacts ---------- Fast-FERTIG - Concat dict values (CLI funktioniert, wenn methode funktioniert)
+- list_contacts ------------ FERTIG
+- group_by_type ------------ FERTIG
 
 Regular Expressions -------- FERTIG
 - mail_adress -------------- FERTIG
@@ -19,15 +19,17 @@ Regular Expressions -------- FERTIG
 
 Datetime Handling ----------
 - contact_creation_time ---- FERTIG 
-- parse_birthdays ---------- NICHT-FERTIG
-- sort_contacts_creation --- NICHT-FERTIG
+- parse_birthdays ---------- FERTIG
+- sort_contacts_creation --- NICHT-FERTIG (Will ich einfach in list contacts integrieren)
+Wenn man die Kontakte aus dem JSON lädt, nimmt created_at the loading zeit.
+... Das wollen wir nicht... Wir müsssen also die creaeted_at im JSON speichern und als optionales Konstruktor-Argument geben.
 - OPT filter_by_daterange -- OPTIONAL
 
 File Handling
-- store contacts in json --- CLI-READY
-- load_contacts ------------ CLI-READY
+- store contacts in json --- Fertig
+- load_contacts ------------ Fertig (on startup, kein Menüpunkt)
 - - correct subclasses ----- FERTIG
-- save_contacts ------------ CLI-READY
+- save_contacts ------------ Fertig
 - exception_handling ------- FERTIG
 
 Multithreading
