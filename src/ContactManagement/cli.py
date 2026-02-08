@@ -9,6 +9,8 @@ ADD_CONTACT = "Add contact"
 LIST_CONTACTS = "List contacts"
 EXIT = "Exit"
 REMOVE_CONTACTS = "Remove contact"
+SEARCH_CONTACT = "Search contact"
+SAVE_CONTACTS = "Save contacts"
 
 def user_make_state_choice(state: dict): # The call can decide what to do with the returned dict index
     user_made_valid_choice = False
@@ -20,7 +22,7 @@ def user_make_state_choice(state: dict): # The call can decide what to do with t
         try:
             response = int(input(">> "))
             return descriptions[response]
-        except (TypeError, IndexError):
+        except (TypeError, IndexError, ValueError):
             print(f"The number you gave was not within range")
 
 
@@ -74,13 +76,13 @@ def main():
     my_contact3 = EmergencyContact(name="Justus", phone="187", email="gg.jr@187.de", priority_level=67)
 
     contact_manager = ContactManager() # This is a singleton; per program run, we only create one instance
-    contact_manager.add_contact(my_contact)
-    contact_manager.add_contact(my_contact2)
-    contact_manager.add_contact(my_contact3)
+    contact_manager.load_contacts() # We load the contacts from the last session.
     state = {
         ADD_CONTACT: False,
         LIST_CONTACTS: False,
+        SEARCH_CONTACT: False,
         REMOVE_CONTACTS: False,
+        SAVE_CONTACTS: False,
         EXIT: False,
     }
     while not state[EXIT]:
@@ -117,13 +119,27 @@ def main():
             state[REMOVE_CONTACTS] = False
         
         if state[EXIT]:
-            print("We, will save your current contacts.")
-            sleep(0.5)
+            print("Saving your current contacts...")
+            contact_manager.save_contacts()
             print("Bye!")
             for thread in contact_manager.threads:
                 thread.join()
             exit(0) # Graceful exit.
         
+        if state[SEARCH_CONTACT]:
+            print("Enter an attribute value of the contact you are searching.")
+            response = input(">> ")
+            matches = contact_manager.search_contacts(response)
+            if not matches:
+                print("No matches found.")
+            else:
+                print(matches)
+            state[SEARCH_CONTACT] = False
+        
+        if state[SAVE_CONTACTS]:
+            print("Saving your current contacts in the background...")
+            contact_manager.save_contacts()
+            state[SAVE_CONTACTS] = False
 
         # For the display:
         print("-" * 40)
