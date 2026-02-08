@@ -8,6 +8,18 @@ import sys
 from abc import ABC, abstractmethod
 import inspect
 from functools import wraps
+from datetime import date
+
+from datetime import datetime, date
+
+def parse_value(ann, s: str):
+    if ann is date:
+        try:
+            return datetime.strptime(s, "%d.%m.%Y").date()
+        except ValueError as e:
+            raise ValueError("Expected date in format DD.MM.YYYY") from e
+    return ann(s)
+
 
 # We just want a single contact manager instance for the UI
 # And we can instantiate it right away in the global scope.
@@ -29,13 +41,15 @@ def gather_parameters(response_validator: Callable[[str], None], func: Callable[
         for p in parameter.parameters.values():
             response_correct = False # We repeat the questions until there is a correct response
             while not response_correct:
+                response = None #Initilizing in the outer scope,.
+                arg = None # Argument to our Contact constructor
                 print(f"Input parameter '{p.name}' of type {p.annotation}")
                 response = input(">>>")
                 response_validator(response) # Handles possible control flow inputs
                 # Try to instantiate the datatype using the anotated datatype:
                 # This does all the checking for us...
                 try:
-                    arg = p.annotation(response)
+                    arg = parse_value(p.annotation, response)
                     response_correct = True
                     func = partial(func, arg) # Reduce the function parameters
                     break

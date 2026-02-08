@@ -3,7 +3,7 @@ from ContactManagement.RegularExpressions import PhoneNumber, Mail, Name
 from datetime import date
 
 class PersonalContact(Contact):
-  def __init__(self, name: Name, phone: PhoneNumber, email: Mail, birthday: date | str):
+  def __init__(self, name: Name, phone: PhoneNumber, email: Mail, birthday: date):
     super().__init__(name, phone, email)
     if isinstance(birthday, str): # In case it is a string, we want to convert it to a date
         try:
