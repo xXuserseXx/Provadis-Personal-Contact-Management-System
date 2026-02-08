@@ -5,10 +5,10 @@ from ContactManagement.WorkContact import WorkContact
 from ContactManagement.RegularExpressions import PhoneNumber
 from pathlib import Path
 from platformdirs import user_data_dir
+from CustomLogging import *
 import json
-import logging
 import threading
-log = logging.getLogger(__name__)
+log = make_logger()
 
 PACKAGE_NAME = "contact-management" # This is also the name that pip uses to reference our package
 # We define it here such that we can later use it to construct the directory in which we save our json.
@@ -44,8 +44,10 @@ def create_file_on_not_found(method):
         try:
             return method(*args, **kwargs)
         except FileNotFoundError as e:
+            log(f"The File was not found, creating file {e.filename}", "WARNING")
             # Just create the file...
             Path(e.filename).touch(exist_ok=True)
+            log(f"{e.filename} was created succesfully, proceding", "INFO")
     return wrapper
 
 # All methods that do file IO should be decorated with it.
@@ -54,18 +56,14 @@ def log_on_permission_denied(method):
         try:
             return method(*args, **kwargs)
         except PermissionError as e:
-            pass
+            log("You don't have the permission to open this file", "CRITICAL")
             # Unfortunately, there is no way our program can fix a PermissionError.
             # The only thing we can do is log it, and keep our program from crashing.
-            # TODO: Do some logging in here.
-            # print(e)
-            # print(e.filename) # The file on whom we need permissions
     return wrapper
 
 
 class ContactManager():
   def __init__(self):
-    log.info("CONSTRUCTED_CONTACT MANAGER")
     self.contacts = []
     # We have a list of threads as an attribute.
     # That is important as one method creates threads (save_contacts)
@@ -74,10 +72,11 @@ class ContactManager():
     # our multithreading architecture would be inefficent.
     self.threads = []
   
+  @log_calls(log)
   def add_contact(self, c):
     with contacts_state_lock: # append alters state, there for needs to aquire lock 
         self.contacts.append(c)
-
+        
   @log_on_permission_denied
   @create_file_on_not_found
   def   save_contacts(self):
@@ -95,6 +94,7 @@ class ContactManager():
     # Start the last thread in the list (the one just appended)
     self.threads[-1].start()
 
+
   @log_on_permission_denied
   @create_file_on_not_found
   def   load_contacts(self):
@@ -102,7 +102,7 @@ class ContactManager():
     # Before loading any contacts, first join all threads that might currently save newer versions:
     for thread in self.threads:
         thread.join()
-    thread.clear() # Now that all threads are joined, clear the list
+    self.threads.clear() # Now that all threads are joined, clear the list
     # First of all, try reading the text from the file (the decorators handle exceptions):
     text: str = json_file.read_text(encoding="utf=8")
     # Then try to parse the json:
@@ -110,13 +110,14 @@ class ContactManager():
         # Load the contacts into (list/dict) objects via json.loads:
         payload = json.loads(text)
     except json.JSONDecoreError:
+        log("JSON File was corrupted", "WARNING")
         # We opt for just deleting the contents of the corrupted file
         # There is no automated general way of fixing corrupted json.
         # And if we don't clear its contents, the program won't work!
         with file_write_lock:
             json_file.write_text("", "utf-8")
         return
-    #  Map items of payload onto Contact objects:
+    # Map items of payload onto Contact objects:
     # Try to instantiate the Contact objects.
     # If the class name does not exist in globals(),
     # globals().get(<name>) will return NoneType
@@ -139,6 +140,7 @@ class ContactManager():
     
   
   #for simplicity purposes we will assume that each name is unique, and working as a primary key
+  @log_calls(log)
   def remove_contact(self, name):
     with contacts_state_lock: # Removal alters state of contacts
         for c in self.contacts:
@@ -147,6 +149,7 @@ class ContactManager():
                 return True
     return False
   
+  #TODO: Search Contacts
   def search_contacts(self, s_key):
     r_list = []
     keyword = s_key.strip().lower()
@@ -164,7 +167,7 @@ class ContactManager():
     r_dict = {}
     
     for c in self.contacts:
-      contact_type = c.contact_type
+      contact_type = c.get_contact_type()
       
       if contact_type not in r_dict:
         r_dict[contact_type] = []

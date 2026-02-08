@@ -39,3 +39,4 @@ def test_regex():
         PhoneNumber("yeet")
     # Testing all that the regex should match:
     PhoneNumber("+49 151")
+    

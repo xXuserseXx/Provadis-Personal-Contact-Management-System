@@ -30,9 +30,22 @@ phone_number_pattern = re.compile(r"^(?:(?:\+|00)\d{1,3}\s?)?[0-9]*$")
 # +49 18257
 # 001 897543
 
+name_pattern = re.compile(r"^[a-zA-Z ]+$")
+# What the name pattern means:
+# A String with length >1 characters
+# Made up only from alphabetical Characters and Spaces
+# It doesnt matter if Letters are Uppercase or lowercase
+
+#Examples:
+# Justus Max Redlin
+# Linus Jahn
+
 # An E-Mail address IS A string
 # A phone number IS A string
+# A name IS A string
 # Sounds like a good use case for inhertance:
+
+
 
 class   Mail(str):
     def __new__(cls, mail: str):
@@ -53,3 +66,11 @@ class   PhoneNumber(str):
         if not re.fullmatch(phone_number_pattern, phone_number):
             raise ValueError(f"Phone number does not obey the regex pattern")
         return super().__new__(cls, phone_number) # Invokation of string copy constructor
+    
+class Name(str):
+    def __new__(cls, name:str):
+        if not isinstance(name, str):
+            raise TypeError(f"Constructor of class Name expects a string not a {type(name)}")
+        if not re.fullmatch(name_pattern, name):
+            raise ValueError(f"Name does not obey the regex pattern")
+        return super().__new__(cls, name) # Invokation of string copy constructor

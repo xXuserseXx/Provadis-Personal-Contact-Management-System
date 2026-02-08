@@ -1,0 +1,38 @@
+Requirements
+Base Class (Contact) ------- FERTIG
+Sub Class (Personal) ------- FERTIG
+Sub Class (Work) ----------- FERTIG
+Sub Class (Emergency) ------ FERTIG
+Polymorphismus ------------- NICHT-FERTIG
+
+Contact Manager ------------ NICHT-FERTIG
+- add_contact -------------- FERTIG
+- remove_contact ----------- CLI-READY
+- search_contacts ---------- NICHT-FERTIG - Concat dict values
+- list_contacts ------------ NICHT-FERTIG - sort with creation date
+- group_by_type ------------ CLI-READY
+
+Regular Expressions -------- FERTIG
+- mail_adress -------------- FERTIG
+- phone_number ------------- FERTIG
+- name --------------------- FERTIG
+
+Datetime Handling ----------
+- contact_creation_time ---- FERTIG 
+- parse_birthdays ---------- NICHT-FERTIG
+- sort_contacts_creation --- NICHT-FERTIG
+- OPT filter_by_daterange -- OPTIONAL
+
+File Handling
+- store contacts in json --- CLI-READY
+- load_contacts ------------ CLI-READY
+- - correct subclasses ----- FERTIG
+- save_contacts ------------ CLI-READY
+- exception_handling ------- FERTIG
+
+Multithreading
+- Asynch Save -------------- FERTIG
+
+Logging Functionality ------ FERTIG
+- closure_based_logger ----- FERTIG
+-decorator_based_logger ---- FERTIG

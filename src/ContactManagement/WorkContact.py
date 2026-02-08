@@ -1,13 +1,14 @@
 from ContactManagement.Contact import Contact, JsonFields
+from ContactManagement.RegularExpressions import PhoneNumber, Mail, Name
 
 class WorkContact(Contact):
-  def __init__(self, name, phone, email, company, job_title):
+  def __init__(self, name: Name, phone: PhoneNumber, email: Mail, company: str, job_title: str):
     super().__init__(name, phone, email)
     self.company = company
     self.job_title = job_title
     
-  def contact_type(self):
-    return "personal"
+  def get_contact_type(self):
+    return type(self).__name__
   
   def __str__(self):
     return f"Name: {self.name}, Phone: {self.phone}, Email: {self.email}, Company: {self.company}, Title: {self.job_title}"

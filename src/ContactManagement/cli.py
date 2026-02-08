@@ -10,7 +10,6 @@ import inspect
 # We just want a single contact manager instance for the UI
 # And we can instantiate it right away in the global scope.
 contact_manager_singleton = ContactManager()
-emergency_contact = EmergencyContact(name="Justus", phone="187", email="gg.jr@187.de", priority_level=67)
 
 class   Action(StrEnum):
     MAIN_MENU = "main menu"

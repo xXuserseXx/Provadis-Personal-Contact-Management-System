@@ -1,6 +1,2 @@
-2026-02-08 05:31:27 INFO ContactManagement.ContactManager: CONSTRUCTED_CONTACT MANAGER
-2026-02-08 05:31:27 INFO ContactManagement.ContactManager: CONSTRUCTED_CONTACT MANAGER
-2026-02-08 05:31:27 INFO ContactManagement.ContactManager: CONSTRUCTED_CONTACT MANAGER
-2026-02-08 05:31:27 INFO ContactManagement.ContactManager: CONSTRUCTED_CONTACT MANAGER
-2026-02-08 05:31:27 INFO test_contacts: CONTACTS DESERIALIZED: Name: Justus, Phone: 187, Email: gg.jr@187.de, Birthday: 1999-12-30
+2026-02-08 12:17:16 INFO test_contacts: CONTACTS DESERIALIZED: Name: Justus, Phone: 187, Email: gg.jr@187.de, Birthday: 1999-12-30
 level 67 Emergency Contact, Name: Justus, Phone: 187, Email: gg.jr@187.de
