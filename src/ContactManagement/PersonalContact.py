@@ -26,3 +26,6 @@ class PersonalContact(Contact):
 
   def get_contact_type(self):
         return type(self).__name__
+      
+  def to_searchable_string(self):
+    return f"{self.name}, {self.phone}, {self.email}, {self.birthday}"

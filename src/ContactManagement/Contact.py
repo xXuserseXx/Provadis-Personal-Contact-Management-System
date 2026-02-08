@@ -52,3 +52,7 @@ class Contact(ABC):
         JsonFields.EMAIL: str(self.email),
         JsonFields.CREATED_AT: self.created_at.isoformat(),
     }
+
+  @abstractmethod
+  def to_searchable_string(self):
+    pass
