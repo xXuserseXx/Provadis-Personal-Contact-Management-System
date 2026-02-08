@@ -1,7 +1,8 @@
 from ContactManagement.Contact import Contact, JsonFields
+from ContactManagement.RegularExpressions import PhoneNumber, Mail
 
 class EmergencyContact(Contact):
-  def __init__(self, name, phone, email, priority_level):
+  def __init__(self, name: str, phone: PhoneNumber, email: Mail, priority_level: int):
     super().__init__(name, phone, email)
     self.priority_level = priority_level
     

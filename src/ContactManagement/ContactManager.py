@@ -7,6 +7,7 @@ from pathlib import Path
 from platformdirs import user_data_dir
 import json
 import logging
+import threading
 log = logging.getLogger(__name__)
 
 PACKAGE_NAME = "contact-management" # This is also the name that pip uses to reference our package
@@ -27,43 +28,123 @@ json_dir: Path = Path(user_data_dir(PACKAGE_NAME))
 # We can execute the mkdir in the top level scope, as it is a preliminary for using this module:
 json_dir.mkdir(parents=True, exist_ok=True)
 json_file = json_dir / "contacts.json"
+# Creating a global lock for file write operations:
+file_write_lock = threading.Lock()
+# Create a global lock to ensure that contacts remain in the exact state
+# they are in when calling ContactManager.save_contacts().
+# This is crucial, as the alternative: "Makeing a deep copy of contacts" takes time
+# within which contacts could already be altered by the main thread.
+contacts_state_lock = threading.Lock()
+
+# This is a decorator for handling FileNotFoundError uniformly.
+# All methods that do file IO should be decorated with it.
+def create_file_on_not_found(method):
+    def wrapper(*args, **kwargs):
+        # try to do execute the method doing the file IO
+        try:
+            return method(*args, **kwargs)
+        except FileNotFoundError as e:
+            # Just create the file...
+            Path(e.filename).touch(exist_ok=True)
+    return wrapper
+
+# All methods that do file IO should be decorated with it.
+def log_on_permission_denied(method):
+    def wrapper(*args, **kwargs):
+        try:
+            return method(*args, **kwargs)
+        except PermissionError as e:
+            pass
+            # Unfortunately, there is no way our program can fix a PermissionError.
+            # The only thing we can do is log it, and keep our program from crashing.
+            # TODO: Do some logging in here.
+            # print(e)
+            # print(e.filename) # The file on whom we need permissions
+    return wrapper
 
 
 class ContactManager():
   def __init__(self):
     log.info("CONSTRUCTED_CONTACT MANAGER")
     self.contacts = []
+    # We have a list of threads as an attribute.
+    # That is important as one method creates threads (save_contacts)
+    # But an entirely different method needs to join them (load_contacts).
+    # If we joined the threads instead in the function that created them (save_contacts),
+    # our multithreading architecture would be inefficent.
+    self.threads = []
   
   def add_contact(self, c):
-    self.contacts.append(c)
+    with contacts_state_lock: # append alters state, there for needs to aquire lock 
+        self.contacts.append(c)
 
+  @log_on_permission_denied
+  @create_file_on_not_found
   def   save_contacts(self):
-    # Transform self.contacts into a data structure that json.dumps accepts (dict/list):
-    formatted_contacts = list(map(lambda contact: contact.to_dict(), self.contacts))
-    json_file.write_text( # This method uses write mode (completely overrides existing entries)
-        json.dumps(formatted_contacts, indent=2), # Using indent to make json prettier
-        encoding="utf-8"
-        )
+    def worker(): # Has all it needs from the closure. Needed because thread requires callable.
+        with contacts_state_lock:
+            # Transform self.contacts into a data structure that json.dumps accepts (dict/list):
+            formatted_contacts = list(map(lambda contact: contact.to_dict(), self.contacts))
+        # As we no longer need our self.contacts, we release the lock right after creating our list.
+        with file_write_lock: # Writing file access needs to lock
+            json_file.write_text( # This method uses write mode (completely overrides existing entries)
+                json.dumps(formatted_contacts, indent=2), # Using indent to make json prettier
+                encoding="utf-8"
+                )
+    self.threads.append(threading.Thread(target=worker))
+    # Start the last thread in the list (the one just appended)
+    self.threads[-1].start()
 
+  @log_on_permission_denied
+  @create_file_on_not_found
   def   load_contacts(self):
-    # This function updates self.contacts
-    # Load the contacts into (list/dict) objects via json.loads:
-    payload = json.loads(json_file.read_text(encoding="utf-8"))
-    # And then map them onto Contact objects:
-    self.contacts = map(
-        lambda contact: globals().get(contact[JsonFields.CONTACT_TYPE])( # The globals.get() will resolve to the class used to construct the contacts
-            *contact[JsonFields.ARGS] # Every contact saves the fields needed to construct itself.
-        ),
-        payload # Apply to all contacts in the json...
-    )
-  
+    """This function updates self.contacts"""
+    # Before loading any contacts, first join all threads that might currently save newer versions:
+    for thread in self.threads:
+        thread.join()
+    thread.clear() # Now that all threads are joined, clear the list
+    # First of all, try reading the text from the file (the decorators handle exceptions):
+    text: str = json_file.read_text(encoding="utf=8")
+    # Then try to parse the json:
+    try:
+        # Load the contacts into (list/dict) objects via json.loads:
+        payload = json.loads(text)
+    except json.JSONDecoreError:
+        # We opt for just deleting the contents of the corrupted file
+        # There is no automated general way of fixing corrupted json.
+        # And if we don't clear its contents, the program won't work!
+        with file_write_lock:
+            json_file.write_text("", "utf-8")
+        return
+    #  Map items of payload onto Contact objects:
+    # Try to instantiate the Contact objects.
+    # If the class name does not exist in globals(),
+    # globals().get(<name>) will return NoneType
+    # Hence the resulting exception we need to handle is: TypeError: 'NoneType' object is not callable
+    try:
+        with contacts_state_lock: # Reassignment of self.contacts needs to be locked. As the worker is actually using self to access self.contacts via the closure.
+            self.contacts = list(map(
+                lambda contact: globals().get(contact[JsonFields.CONTACT_TYPE])( # The globals.get() will resolve to the class used to construct the contacts
+                    *contact[JsonFields.ARGS] # Every contact saves the fields needed to construct itself.
+                ),
+                payload # Apply to all contacts in the json...
+            ))
+    except TypeError: # NoneType not callable (Unknown Contact Type)
+        # To get back to a working state of the json,
+        # we filter out all json objects containing an unknown contact type.
+        self.save_contacts(filter(
+            lambda contact: globals().get(contact[JsonFields.CONTACT_TYPE]) is not None,
+            self.contacts
+        ))
+    
   
   #for simplicity purposes we will assume that each name is unique, and working as a primary key
   def remove_contact(self, name):
-    for c in self.contacts:
-      if c.get_name() == name:
-        self.contacts.remove(c)
-        return True
+    with contacts_state_lock: # Removal alters state of contacts
+        for c in self.contacts:
+            if c.get_name() == name:
+                self.contacts.remove(c)
+                return True
     return False
   
   def search_contacts(self, s_key):
