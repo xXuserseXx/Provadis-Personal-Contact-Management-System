@@ -3,7 +3,7 @@ import re
 mail_pattern = re.compile(r"^[a-zA-Z]+([._]?[a-zA-Z0-9]+)*@[^\s@]+\.[a-zA-Z]+$")
 # What the mail pattern means:
 # An Email address starts with one or more alphabetical characters.
-# Afterwards, there has to be either a dot or an underscore.
+# Afterwards, there is the option for either a dot or an underscore.
 # Again followed by alphabetical charcters.
 # Afterwards, optionally a number.
 # Then the @ sign.

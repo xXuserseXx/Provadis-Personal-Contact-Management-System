@@ -71,10 +71,6 @@ def print_choice(iterable):
         print(f"[{i}] {e}")
 
 def main():
-    # For testing only:
-    my_contact = PersonalContact(name="Justus", phone="187", email="gg.jr@187.de", birthday=date(1999, 12, 30))
-    my_contact2 = WorkContact(name="Justus", phone="187", email="gg.jr@187.de", company="FleischbergBrothers", job_title="dr.rer.med")
-    my_contact3 = EmergencyContact(name="Justus", phone="187", email="gg.jr@187.de", priority_level=67)
 
     contact_manager = ContactManager() # This is a singleton; per program run, we only create one instance
     contact_manager.load_contacts() # We load the contacts from the last session.
