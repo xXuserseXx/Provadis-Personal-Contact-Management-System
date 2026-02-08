@@ -31,6 +31,7 @@ def test_deserialization_of_contacts():
     # Now instantiate a new one to deserialize them:
     second_manager = ContactManager()
     second_manager.load_contacts()
+    assert len(second_manager.contacts) >= 2, "The contacts were not saved correctly"
     log.info("CONTACTS DESERIALIZED: %s", str(second_manager))
 
 def test_regex():
