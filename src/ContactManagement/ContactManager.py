@@ -100,7 +100,9 @@ class ContactManager():
   def   load_contacts(self):
     """This function updates self.contacts"""
     # Before loading any contacts, first join all threads that might currently save newer versions:
-    map(lambda thread: thread.join(), self.threads)
+    for thread in self.threads:
+        thread.join()
+    thread.clear() # Now that all threads are joined, clear the list
     # First of all, try reading the text from the file (the decorators handle exceptions):
     text: str = json_file.read_text(encoding="utf=8")
     # Then try to parse the json:
