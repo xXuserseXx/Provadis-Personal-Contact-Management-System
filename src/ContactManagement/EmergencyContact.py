@@ -17,3 +17,6 @@ class EmergencyContact(Contact):
     info["priority_level"] = self.priority_level
     info[JsonFields.ARGS] = [self.name, str(self.phone), str(self.email), self.priority_level]
     return info
+  
+  def to_searchable_string(self):
+    return f"{self.name}, {self.phone}, {self.email}, {self.priority_level}"

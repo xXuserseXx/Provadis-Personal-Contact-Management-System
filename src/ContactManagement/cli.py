@@ -31,7 +31,7 @@ def ask_for(contact_attribute: str, save_to: dict, checker: Callable[..., any], 
     user_gave_valid_response = False # variable is just used to make it more descriptive
     while not user_gave_valid_response:
         try:
-            print(f"What is the {contact_attribute.replace("_", " ").replace("phone", "phone number")} of the contact?")
+            print(f"What is the {contact_attribute.replace('_', ' ').replace('phone', 'phone number')} of the contact?")
             if instructions:
                 print(instructions)
             save_to[contact_attribute] = checker(input(">> "))
@@ -59,7 +59,7 @@ def ask_for_constructor_data(constructor):
         ask_for(contact_attribute="company", save_to=gathered_data, checker=lambda x: x)
         ask_for(contact_attribute="job_title", save_to=gathered_data, checker=lambda x: x)
     elif constructor == PersonalContact:
-        ask_for(contact_attribute="birthday", save_to=gathered_data, checker=check_date, instructions="Provide the date in the following format: DD.MM.YY .")
+        ask_for(contact_attribute="birthday", save_to=gathered_data, checker=check_date, instructions="Provide the date in the following format: DD.MM.YYYY .")
     elif constructor == EmergencyContact:
         ask_for(contact_attribute="priority_level", save_to=gathered_data, checker=int)
     # Given the subclass type, some attributes are not needed (still None), we filter them out.
@@ -110,7 +110,7 @@ def main():
         if state[LIST_CONTACTS_GROUP]:
             groups = contact_manager.group_by_type()
             for t in groups.keys():
-                print(f"Your {t.lower().replace("contact", "")} contacts:")
+                print(f"Your {t.lower().replace('contact', '')} contacts:")
                 if not groups[t]:
                     print(f"    Currently, no contacts of this type.")
                 else:
@@ -153,7 +153,7 @@ def main():
         
         if state[LIST_CONTACTS_DATE]:
             for contact in contact_manager.contacts:
-                print(f"Created at {contact.created_at.strftime("%d.%m.%Y %H:%M:%S")}:")
+                print(f"Created at {contact.created_at.strftime('%d.%m.%Y %H:%M:%S')}:")
                 print(f"    {str(contact)}")
             state[LIST_CONTACTS_DATE] = False
 
