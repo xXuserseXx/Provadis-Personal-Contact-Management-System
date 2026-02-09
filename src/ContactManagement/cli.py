@@ -139,7 +139,8 @@ def main():
             if not matches:
                 print("No matches found.")
             else:
-                print(matches)
+                for m in matches:
+                    print(m)
             state[SEARCH_CONTACT] = False
         
         if state[SAVE_CONTACTS]:

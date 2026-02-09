@@ -139,7 +139,7 @@ class ContactManager():
         self.contacts = contacts
     
   
-  #for simplicity purposes we will assume that each name is unique, and working as a primary key
+  # for simplicity purposes we will assume that each name is unique, and working as a primary key
   @log_calls(log)
   def remove_contact(self, name):
     with contacts_state_lock: # Removal alters state of contacts
@@ -149,7 +149,8 @@ class ContactManager():
                 return True
     return False
   
-  #TODO: Search Contacts
+  # Our search method utilizes a custon to_searchable_string method, implemented in each sub-Contact-class, and
+  # string matching to match search keywords to Contacts Objects
   def search_contacts(self, s_key):
     with contacts_state_lock:
         r_list = []
@@ -163,6 +164,7 @@ class ContactManager():
   def list_contacts(self):
     return self.contacts
   
+  # return a dict containing all Contact Objects, this method uses the contact type as key
   def group_by_type(self):
     r_dict = {}
     
