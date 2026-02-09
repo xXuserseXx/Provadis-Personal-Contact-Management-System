@@ -5,6 +5,7 @@ from ContactManagement.WorkContact import WorkContact
 from ContactManagement.RegularExpressions import PhoneNumber
 from pathlib import Path
 from platformdirs import user_data_dir
+from datetime import datetime
 from CustomLogging import *
 import json
 import threading
@@ -130,6 +131,7 @@ class ContactManager():
             continue
         try:
             contacts.append(contact_class(*contact[JsonFields.ARGS]))
+            contacts[-1].created_at = datetime.fromisoformat(contact[JsonFields.CREATED_AT]) # Timestamp should be date of creation not date of loading
         except (TypeError, KeyError) as error:
             log(f"Skipping invalid contact payload ({type(error).__name__}: {error})", "WARNING")
             continue
