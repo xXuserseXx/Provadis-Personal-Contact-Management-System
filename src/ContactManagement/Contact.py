@@ -59,5 +59,5 @@ class Contact(ABC):
   @abstractmethod
   def to_searchable_string(self):
     # we use an abstractmethod that returns the most crucial information of a Contact put into a string format
-    # to allow easier searching
+    # to allow easier searching, each subclass implements its own version of this method (duh)
     pass
