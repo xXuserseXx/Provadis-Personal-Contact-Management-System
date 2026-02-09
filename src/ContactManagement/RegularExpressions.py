@@ -1,40 +1,35 @@
 import re
 
-mail_pattern = re.compile(r"^[a-zA-Z]+([._]?[a-zA-Z0-9]+)*@[^\s@]+\.[a-zA-Z]+$")
+mail_pattern = re.compile(
+    r"^[A-Za-z0-9]+([._%+-]?[A-Za-z0-9]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+$"
+)
 # What the mail pattern means:
-# An Email address starts with one or more alphabetical characters.
-# Afterwards, there is the option for either a dot or an underscore.
-# Again followed by alphabetical charcters.
-# Afterwards, optionally a number.
-# Then the @ sign.
-# Afterwards, a string of arbitrary characters except white spaces or @
-# A literal dot.
-# A strig of alphabetical charcters.
-# End of string.
+# An Email address starts with one or more alphanumeric characters.
+# It can include dot/underscore/plus/minus segments in the local part.
+# The domain can include subdomains separated by dots.
 
 # Example:
 # luis.gaertner@stud-provadis.de
 
-phone_number_pattern = re.compile(r"^(?:(?:\+|00)\d{1,3}\s?)?[0-9]*$")
+phone_number_pattern = re.compile(
+    r"^(?:(?:\+|00)\d{1,3}[\s-]?)?\d{2,4}(?:[\s-]?\d{2,4}){1,3}$"
+)
 # What the phone number pattern means:
 # You can either give a country code or omit it.
 # If the country code is given:
 # +<country_code> or
 # 00<country_code>.
 # The country code can be 1 - 3 digits long.
-# Afterwards an arbitrary amount of digits.
-# We used non-capturing groups for the country code.
-# As they are just units for the ? quantifier or the | ("or") to work.
+# Afterwards we accept 2-4 digit groups separated by spaces or hyphens.
 
 # Examples:
-# +49 18257
-# 001 897543
+# +49 151 234 567
+# 001-897-543-21
 
-name_pattern = re.compile(r"^[a-zA-Z ]+$")
+name_pattern = re.compile(r"^[A-Za-z]+(?:[ '\-][A-Za-z]+)*$")
 # What the name pattern means:
-# A String with length >1 characters
-# Made up only from alphabetical Characters and Spaces
-# It doesnt matter if Letters are Uppercase or lowercase
+# A string made up of letters with optional separators.
+# We accept spaces, apostrophes, or hyphens between name parts.
 
 #Examples:
 # Justus Max Redlin

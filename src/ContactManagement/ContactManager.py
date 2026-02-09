@@ -104,12 +104,12 @@ class ContactManager():
         thread.join()
     self.threads.clear() # Now that all threads are joined, clear the list
     # First of all, try reading the text from the file (the decorators handle exceptions):
-    text: str = json_file.read_text(encoding="utf=8")
+    text: str = json_file.read_text(encoding="utf-8")
     # Then try to parse the json:
     try:
         # Load the contacts into (list/dict) objects via json.loads:
         payload = json.loads(text)
-    except json.JSONDecoreError:
+    except json.JSONDecodeError:
         log("JSON File was corrupted", "WARNING")
         # We opt for just deleting the contents of the corrupted file
         # There is no automated general way of fixing corrupted json.
@@ -121,22 +121,18 @@ class ContactManager():
     # Try to instantiate the Contact objects.
     # If the class name does not exist in globals(),
     # globals().get(<name>) will return NoneType
-    # Hence the resulting exception we need to handle is: TypeError: 'NoneType' object is not callable
-    try:
-        with contacts_state_lock: # Reassignment of self.contacts needs to be locked. As the worker is actually using self to access self.contacts via the closure.
-            self.contacts = list(map(
-                lambda contact: globals().get(contact[JsonFields.CONTACT_TYPE])( # The globals.get() will resolve to the class used to construct the contacts
-                    *contact[JsonFields.ARGS] # Every contact saves the fields needed to construct itself.
-                ),
-                payload # Apply to all contacts in the json...
-            ))
-    except TypeError: # NoneType not callable (Unknown Contact Type)
-        # To get back to a working state of the json,
-        # we filter out all json objects containing an unknown contact type.
-        self.save_contacts(filter(
-            lambda contact: globals().get(contact[JsonFields.CONTACT_TYPE]) is not None,
-            self.contacts
-        ))
+    contacts = []
+    for contact in payload:
+        contact_class = globals().get(contact.get(JsonFields.CONTACT_TYPE))
+        if contact_class is None:
+            continue
+        try:
+            contacts.append(contact_class(*contact[JsonFields.ARGS]))
+        except (TypeError, KeyError) as error:
+            log(f"Skipping invalid contact payload ({type(error).__name__}: {error})", "WARNING")
+            continue
+    with contacts_state_lock: # Reassignment of self.contacts needs to be locked. As the worker is actually using self to access self.contacts via the closure.
+        self.contacts = contacts
     
   
   #for simplicity purposes we will assume that each name is unique, and working as a primary key

@@ -38,6 +38,9 @@ class Contact(ABC):
     
   def __str__(self):
     return f"Name: {self.name}, Phone: {self.phone}, Email: {self.email}"
+
+  def get_name(self):
+    return self.name
   
   @abstractmethod
   def get_contact_type(self):
