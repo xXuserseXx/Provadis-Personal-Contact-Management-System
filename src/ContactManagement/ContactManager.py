@@ -63,14 +63,16 @@ def log_on_permission_denied(method):
 
 
 class ContactManager():
-  def __init__(self):
-    self.contacts = []
-    # We have a list of threads as an attribute.
+    # We have a list of threads as a class attribute.
     # That is important as one method creates threads (save_contacts)
     # But an entirely different method needs to join them (load_contacts).
     # If we joined the threads instead in the function that created them (save_contacts),
     # our multithreading architecture would be inefficent.
-    self.threads = []
+  threads = [] # Make the threads list shared between instances in case we use more than a singleton (several instances)
+
+  def __init__(self):
+    self.contacts = []
+  
   
   @log_calls(log)
   def add_contact(self, c):
@@ -90,9 +92,9 @@ class ContactManager():
                 json.dumps(formatted_contacts, indent=2), # Using indent to make json prettier
                 encoding="utf-8"
                 )
-    self.threads.append(threading.Thread(target=worker))
+    ContactManager.threads.append(threading.Thread(target=worker))
     # Start the last thread in the list (the one just appended)
-    self.threads[-1].start()
+    ContactManager.threads[-1].start()
 
 
   @log_on_permission_denied
@@ -100,9 +102,9 @@ class ContactManager():
   def   load_contacts(self):
     """This function updates self.contacts"""
     # Before loading any contacts, first join all threads that might currently save newer versions:
-    for thread in self.threads:
+    for thread in ContactManager.threads:
         thread.join()
-    self.threads.clear() # Now that all threads are joined, clear the list
+    ContactManager.threads.clear() # Now that all threads are joined, clear the list
     # First of all, try reading the text from the file (the decorators handle exceptions):
     text: str = json_file.read_text(encoding="utf-8")
     # Then try to parse the json:

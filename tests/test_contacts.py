@@ -120,13 +120,13 @@ def test_contact_manager_saves_and_loads_round_trip(temp_contact_storage):
     manager.add_contact(personal)
     manager.add_contact(emergency)
 
-    # Save contacts to the temporary file and wait for the save thread to finish.
+    # Save contacts to the temporary file.
     manager.save_contacts()
-    for thread in manager.threads:
-        thread.join()
 
     # Load the contacts into a new manager and confirm types/fields.
     reloaded_manager = ContactManager()
+    # As the threads are shared among instances and load_contracts joins all threads by itself
+    # There is no need to call join additionally.
     reloaded_manager.load_contacts()
     reloaded_contacts = reloaded_manager.list_contacts()
 

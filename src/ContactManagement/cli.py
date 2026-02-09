@@ -128,7 +128,7 @@ def main():
             print("Saving your current contacts...")
             contact_manager.save_contacts()
             print("Bye!")
-            for thread in contact_manager.threads:
+            for thread in ContactManager.threads:
                 thread.join()
             exit(0) # Graceful exit.
         
